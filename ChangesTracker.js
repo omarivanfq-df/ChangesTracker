@@ -119,6 +119,11 @@ class ChangesTracker {
         this.trackedFields.push(...validFieldIds);
     }
 
+    RemoveTrackedFields(fieldsId) {
+        this.trackedFields = this.trackedFields
+            .filter(fieldId => !fieldsId.includes(fieldId));
+    }
+
     SetDefaultValue(fieldType, defaultValue) {
         if (Object.values(FIELD_TYPES).includes(fieldType)) {
             this.defaultValues[fieldType] = defaultValue;

@@ -202,6 +202,13 @@ describe('Basic field types (specifying tracked fields)', () => {
         expect(changesTracker.ChangesWereMade()).toBe(false);
     });
 
+    test('Removing tracked field', () => {
+        record.MyText = 'Haters gonna hate';
+        expect(changesTracker.ChangesWereMade()).toBe(true);
+        changesTracker.RemoveTrackedFields(['MyText']);
+        expect(changesTracker.ChangesWereMade()).toBe(false);
+    });
+
 });
 
 describe('Complex examples with specified tracked fields', () => {
