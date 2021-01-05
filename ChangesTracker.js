@@ -101,11 +101,8 @@ class ChangesTracker {
                     return true;
             }
         }
-        const areEqual = CompareFieldsAccordingToType(previousValue, currentValue, type); // false
+        const areEqual = CompareFieldsAccordingToType(previousValue, currentValue, type);
         if (this.isLogActive && !areEqual) {
-            // type = 'Numeric'
-            // previousValue = null
-            // currentValue = null
             this.log('notice', `### ${fieldId} field changed: ${type}(${JSON.stringify(previousValue)}, ${JSON.stringify(currentValue)})`);
         }
         return areEqual;
@@ -151,9 +148,10 @@ function TransformToObject(fieldsArray) {
 function CompareFieldsAccordingToType(previousValue, currentValue, type) {
     switch (type) {
         case FIELD_TYPES.TEXT:
-        case FIELD_TYPES.NUMERIC:
         case FIELD_TYPES.TRUE_FALSE:
             return previousValue === currentValue;
+        case FIELD_TYPES.NUMERIC:
+            return CompareNumerics(previousValue, currentValue);
         case FIELD_TYPES.DATE:
             return CompareDates(previousValue, currentValue);
         case FIELD_TYPES.LINK:
@@ -161,6 +159,13 @@ function CompareFieldsAccordingToType(previousValue, currentValue, type) {
         default:
             return true;
     }
+}
+
+function CompareNumerics(previous, current) {
+    if (isNaN(previous) && isNaN(current)) {
+        return true;
+    }
+    return previous === current;
 }
 
 function CompareDates(date1, date2) { 

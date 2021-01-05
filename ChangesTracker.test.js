@@ -703,3 +703,38 @@ describe('Links [] / null', () => {
 
 });
 
+describe('NaN', () => {
+    test('NaN === NaN', () => {
+        record = Object.assign({}, START_RECORD);
+        record.MyNumber = 0/0; // NaN
+        changesTracker = new ChangesTracker(context, record);
+        record.MyNumber = 0/0; // NaN
+        expect(changesTracker.ChangesWereMade()).toBe(false);
+    });
+
+    test('null === NaN', () => {
+        record = Object.assign({}, START_RECORD);
+        record.MyNumber = null;
+        changesTracker = new ChangesTracker(context, record);
+        record.MyNumber = 0/0; // NaN
+        expect(changesTracker.ChangesWereMade()).toBe(true);
+    });
+
+    test('NaN === null', () => {
+        record = Object.assign({}, START_RECORD);
+        record.MyNumber = null;
+        changesTracker = new ChangesTracker(context, record);
+        record.MyNumber = 0/0; // NaN
+        expect(changesTracker.ChangesWereMade()).toBe(true);
+    });
+
+    test('0 === null', () => {
+        record = Object.assign({}, START_RECORD);
+        record.MyNumber = 0;
+        changesTracker = new ChangesTracker(context, record);
+        record.MyNumber = 0/0; // NaN
+        expect(changesTracker.ChangesWereMade()).toBe(true);
+    });
+
+});
+
