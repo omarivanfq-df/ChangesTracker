@@ -37,6 +37,15 @@ const Blitz = {
     }
 }
 
+function Clean(obj) {
+    const propNames = Object.getOwnPropertyNames(obj);
+    for (const propName of propNames) {
+        if (obj[propName] === null || obj[propName] === undefined) {
+            delete obj[propName];
+        }
+    }
+}
+
 const product1Record = {
     _id: '111',
     Price: 100,
@@ -597,6 +606,99 @@ describe('Complete example', () => {
         expect(timesSaved).toBe(endOfTimes);
         expect(record.MyNumber).toBe(START_RECORD.MyNumber);
         
+    });
+
+});
+
+
+describe('Assigning wrong data', () => {
+    
+    beforeEach(() => {
+        record = Object.assign({}, START_RECORD);
+        changesTracker = new ChangesTracker(context, record);
+    });
+    
+    test('Numeric - null', () => {
+        record.MyNumber = null;
+        expect(changesTracker.ChangesWereMade()).toBe(true);
+        expect(record.MyNumber).toBe(null);
+    });
+
+    test('Numeric - null (pt.2)', () => {
+        record = Object.assign({}, START_RECORD);
+        record.MyNumber = null;
+        changesTracker = new ChangesTracker(context, record);
+        expect(changesTracker.ChangesWereMade()).toBe(false);
+        Clean(record);
+        expect(record.MyNumber).toBe(undefined);
+        expect(changesTracker.ChangesWereMade()).toBe(true);
+        expect(record.MyNumber).toBe(DEFAULT_VALUES.Numeric); // 0
+
+    });
+
+    test('Numeric - null (pt.3)', () => {
+        record = Object.assign({}, START_RECORD);
+        delete record.MyNumber;
+        changesTracker = new ChangesTracker(context, record);
+        expect(changesTracker.ChangesWereMade()).toBe(false);
+        Clean(record);
+        expect(record.MyNumber).toBe(undefined);
+        expect(changesTracker.ChangesWereMade()).toBe(false);
+    });
+
+    test('Numeric - text', () => {
+        record = Object.assign({}, START_RECORD, { MyNumber: 'bad data' });
+        changesTracker = new ChangesTracker(context, record);
+        expect(changesTracker.ChangesWereMade()).toBe(false);
+        Clean(record);
+        expect(record.MyNumber).toBe('bad data');
+    });
+
+    test('Numeric - text', () => {
+        record.MyNumber = 'bad data';
+        expect(changesTracker.ChangesWereMade()).toBe(true);
+        Clean(record);
+        expect(record.MyNumber).toBe('bad data');
+    });
+
+    test('Null - undefined', () => {
+        record.MyNumber = null;
+        expect(changesTracker.ChangesWereMade()).toBe(true);
+        changesTracker = new ChangesTracker(context, record);
+        expect(changesTracker.ChangesWereMade()).toBe(false);
+        Clean(record);
+        expect(record.MyNumber).toBe(undefined);
+        expect(changesTracker.ChangesWereMade()).toBe(true);
+        expect(record.MyNumber).toBe(0);
+        Clean(record);
+    });
+
+    test('undefined - null', () => {
+        record = Object.assign({}, START_RECORD);
+        delete record.MyNumber;
+        expect(changesTracker.ChangesWereMade()).toBe(false);
+        Clean(record);
+        expect(record.MyNumber).toBe(undefined);
+    }); 
+
+});
+
+describe('Links [] / null', () => {
+    
+    test('[] -> null', () => {
+        record = Object.assign({}, START_RECORD);
+        record.MyLink = [];
+        changesTracker = new ChangesTracker(context, record);
+        record.MyLink = null;
+        expect(changesTracker.ChangesWereMade()).toBe(false);
+    });
+
+    test('null -> []', () => {
+        record = Object.assign({}, START_RECORD);
+        record.MyLink = null;
+        changesTracker = new ChangesTracker(context, record);
+        record.MyLink = [];
+        expect(changesTracker.ChangesWereMade()).toBe(false);
     });
 
 });

@@ -92,7 +92,7 @@ class ChangesTracker {
         if (currentValue === undefined && previousValue !== undefined) {
             switch (this.config.erasedCompare) {
                 case ERASED_COMPARE.FIX: 
-                    currentValue = this.record[fieldId] = this.defaultValues[type];
+                    currentValue = this.record[fieldId] = this.defaultValues[type]; //
                     if (this.isLogActive && previousValue !== this.defaultValues[type]) {
                         this.log('notice', `### Field ${fieldId} was fixed: ${type}(undefined, ${JSON.stringify(currentValue)})`);
                     }
@@ -101,8 +101,11 @@ class ChangesTracker {
                     return true;
             }
         }
-        const areEqual = CompareFieldsAccordingToType(previousValue, currentValue, type);
+        const areEqual = CompareFieldsAccordingToType(previousValue, currentValue, type); // false
         if (this.isLogActive && !areEqual) {
+            // type = 'Numeric'
+            // previousValue = null
+            // currentValue = null
             this.log('notice', `### ${fieldId} field changed: ${type}(${JSON.stringify(previousValue)}, ${JSON.stringify(currentValue)})`);
         }
         return areEqual;
@@ -174,8 +177,8 @@ function CompareDates(date1, date2) {
 }
 
 function CompareLinks(previousValue, currentValue) {
-    previousValue = GetLinkAsArray(previousValue);
-    currentValue = GetLinkAsArray(currentValue);
+    previousValue = GetLinkAsArray(previousValue); // []
+    currentValue = GetLinkAsArray(currentValue); // null
     if (previousValue) {
         if (currentValue) {
             if (previousValue.length === currentValue.length) {
@@ -192,7 +195,10 @@ function CompareLinks(previousValue, currentValue) {
 
 function GetLinkAsArray(link) {
     if (Array.isArray(link)) {
-        return link.slice(); // to avoid modifying the original array order later on 
+        if (link.length) {
+            return link.slice(); // to avoid modifying the original array order later on 
+        }
+        return null;
     } else if (typeof link === 'object' && link !== null) {
         return [link];
     }
