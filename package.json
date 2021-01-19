@@ -9,6 +9,15 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "jest": "^26.4.2"
+    "jest": "^26.4.2",
+    "@babel/core": "^7.11.1",
+    "@babel/eslint-parser": "^7.11.0",
+    "@babel/helper-plugin-utils": "^7.10.4",
+    "@babel/plugin-syntax-top-level-await": "^7.10.4",
+    "eslint": "^7.6.0",
+    "eslint-plugin-no-floating-promise": "git+https://github.com/javiermontemayor/eslint-plugin-no-floating-promise.git"
+  },
+  "dependencies": {
+    "lodash": "^4.17.20"
   }
 }

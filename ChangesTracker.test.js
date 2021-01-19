@@ -1,6 +1,8 @@
+/* eslint-disable init-declarations */
+/* eslint-disable no-magic-numbers */
 const ChangesTracker = require('./ChangesTracker');
 
-const { 
+const {
     FIELD_TYPES,
     DEFAULT_VALUES,
     ERASED_COMPARE
@@ -35,7 +37,7 @@ const Blitz = {
             }
         }
     }
-}
+};
 
 function Clean(obj) {
     const propNames = Object.getOwnPropertyNames(obj);
@@ -74,12 +76,12 @@ const START_RECORD = {
     MyTrueFalse: true,
     MyDate: new Date(2020, 10, 11),
     MyLink: [product1Record],
-    schemaId: 'InvoiceItem',
+    schemaId: 'InvoiceItem'
 };
 
 let record;
 let changesTracker;
-let log = (_, message) => console.log(message);
+const log = (_, message) => console.log(message);
 
 const context = {
     Blitz,
@@ -93,43 +95,43 @@ describe('Basic field types', () => {
         record = Object.assign({}, START_RECORD);
         changesTracker = new ChangesTracker(context, record);
     });
-    
+
     test('Record remains unmodified', () => {
         expect(changesTracker.ChangesWereMade()).toBe(false);
     });
-    
+
     test('Record changes one of its properties (numeric)', () => {
         record.MyNumber = 1001;
         expect(changesTracker.ChangesWereMade()).toBe(true);
     });
-    
+
     test('Re-assigning same value to property', () => {
         record.MyNumber = 1000;
         expect(changesTracker.ChangesWereMade()).toBe(false);
     });
-    
+
     test('Changing one property (text) and then changing it back', () => {
         record.MyText = 'Everyone must stand alone';
         expect(changesTracker.ChangesWereMade()).toBe(true);
         record.MyText = 'Life is a mistery';
         expect(changesTracker.ChangesWereMade()).toBe(false);
     });
-    
+
     test('Changing one property (text)', () => {
         record.MyText = 'Everyone must stand alone';
         expect(changesTracker.ChangesWereMade()).toBe(true);
     });
-    
+
     test('Changing one property (true/false)', () => {
         record.MyTrueFalse = false;
         expect(changesTracker.ChangesWereMade()).toBe(true);
     });
-    
+
     test('Re-assigning same value to property (true/false)', () => {
         record.MyTrueFalse = true;
         expect(changesTracker.ChangesWereMade()).toBe(false);
     });
-    
+
     test('Changing several properties and setting them back', () => {
         record.MyText = 'Everyone must stand alone';
         record.MyNumber = 1001;
@@ -138,7 +140,7 @@ describe('Basic field types', () => {
         record.MyNumber = 1000;
         expect(changesTracker.ChangesWereMade()).toBe(false);
     });
-    
+
     test('Changing several properties and setting just one of them back', () => {
         record.MyText = 'Everyone must stand alone';
         record.MyNumber = 1001;
@@ -146,14 +148,14 @@ describe('Basic field types', () => {
         record.MyNumber = 1000;
         expect(changesTracker.ChangesWereMade()).toBe(true);
     });
-    
+
     test('Changing one property (date)', () => {
-        record.MyDate = new Date(2020,0,1);
+        record.MyDate = new Date(2020, 0, 1);
         expect(changesTracker.ChangesWereMade()).toBe(true);
     });
-    
+
     test('Re-assigning same value to property (date)', () => {
-        record.MyDate = new Date(2020,10,11);
+        record.MyDate = new Date(2020, 10, 11);
         expect(changesTracker.ChangesWereMade()).toBe(false);
     });
 });
@@ -200,7 +202,7 @@ describe('Basic field types (specifying tracked fields)', () => {
 
     test('Changing un-tracked fields and then changing tracked fields', () => {
         record.MyNumber = 1002;
-        record.MyDate = new Date(2020,11,25);
+        record.MyDate = new Date(2020, 11, 25);
         expect(changesTracker.ChangesWereMade()).toBe(false);
         record.MyText = 'Haters gonna hate';
         record.MyTrueFalse = false;
@@ -319,7 +321,6 @@ describe('Erasing properties', () => {
 
 });
 
-
 describe('Links (Lookups)', () => {
     beforeEach(() => {
         record = Object.assign({}, START_RECORD);
@@ -407,17 +408,17 @@ describe('Links (Lookups)', () => {
         expect(changesTracker.ChangesWereMade()).toBe(false);
 
         record.MyLink = [product3Record, product1Record];
-        expect(changesTracker.ChangesWereMade()).toBe(false); 
+        expect(changesTracker.ChangesWereMade()).toBe(false);
 
         record.MyLink = [product3Record, product2Record];
-        expect(changesTracker.ChangesWereMade()).toBe(true); 
+        expect(changesTracker.ChangesWereMade()).toBe(true);
 
         record.MyLink = [product3Record, product2Record, product1Record];
-        expect(changesTracker.ChangesWereMade()).toBe(true); 
+        expect(changesTracker.ChangesWereMade()).toBe(true);
 
         changesTracker = new ChangesTracker(context, record);
 
-        expect(changesTracker.ChangesWereMade()).toBe(false); 
+        expect(changesTracker.ChangesWereMade()).toBe(false);
 
         record.MyLink = [product1Record, product2Record, product3Record];
         expect(changesTracker.ChangesWereMade()).toBe(false);
@@ -481,7 +482,7 @@ describe('Configuration', () => {
         expect(record.MyNumber).toBe(DEFAULT_VALUES.Numeric); // 0
 
         changesTracker.SetDefaultValue(FIELD_TYPES.NUMERIC, -1);
-        
+
         expect(record.MyNumber).toBe(DEFAULT_VALUES.Numeric); // 0
         delete record.MyNumber;
         expect(record.MyNumber).toBe(undefined);
@@ -499,7 +500,7 @@ describe('Complete example', () => {
                 // undefined/erased properties return to their original value after save
                 record.MyNumber = START_RECORD.MyNumber;
             }
-        }
+        };
     });
 
     afterAll(() => {
@@ -510,7 +511,7 @@ describe('Complete example', () => {
         record = Object.assign({}, START_RECORD);
     });
 
-    test('Saving-cycle when record defined property is erased (erasedCompare: FIX)', async () => {
+    test('Saving-cycle when record defined property is erased (erasedCompare: FIX)', async() => {
         const endOfTimes = 1000;
         let timesSaved = 0;
 
@@ -522,8 +523,7 @@ describe('Complete example', () => {
 
             if (changesTracker.ChangesWereMade()) {
                 await Blitz.Catalogs[record.schemaId].save(record);
-            }
-            else break;
+            } else break;
             timesSaved++;
             // onRecordUpdated ends
         }
@@ -532,7 +532,7 @@ describe('Complete example', () => {
         expect(record.MyNumber).toBe(DEFAULT_VALUES.Numeric); // 0
     });
 
-    test('Saving-cycle when record defined property is erased (erasedCompare: IGNORE)', async () => {
+    test('Saving-cycle when record defined property is erased (erasedCompare: IGNORE)', async() => {
         const endOfTimes = 1000;
         let timesSaved = 0;
 
@@ -546,17 +546,16 @@ describe('Complete example', () => {
 
             if (changesTracker.ChangesWereMade()) {
                 await Blitz.Catalogs[record.schemaId].save(record);
-            }
-            else break;
+            } else break;
             timesSaved++;
             // onRecordUpdated ends
         }
 
         expect(timesSaved).toBe(0);
-        
+
     });
 
-    test('Saving-cycle when record defined property is erased (erasedCompare: NONE) (infinite cycle)', async () => {
+    test('Saving-cycle when record defined property is erased (erasedCompare: NONE) (infinite cycle)', async() => {
         const endOfTimes = 1000;
         let timesSaved = 0;
 
@@ -570,18 +569,17 @@ describe('Complete example', () => {
 
             if (changesTracker.ChangesWereMade()) { // always true (MyNumber => 1000 vs. undefined)
                 await Blitz.Catalogs[record.schemaId].save(record); // MyNumber returns to 1000 after saving because no action is taken
-            }
-            else break;
+            } else break;
             timesSaved++;
             // onRecordUpdated ends
         }
 
         expect(timesSaved).toBe(endOfTimes);
         expect(record.MyNumber).toBe(START_RECORD.MyNumber);
-        
+
     });
 
-    test('Saving-cycle when record defined property is assigned undefined (erasedCompare: NONE) (infinite cycle)', async () => {
+    test('Saving-cycle when record defined property is assigned undefined (erasedCompare: NONE) (infinite cycle)', async() => {
         const endOfTimes = 1000;
         let timesSaved = 0;
         const GetRelatedRecord = () => ({});
@@ -595,29 +593,27 @@ describe('Complete example', () => {
             const relatedRecord = GetRelatedRecord(record);
             record.MyNumber = relatedRecord.MyNumber;
 
-            if (changesTracker.ChangesWereMade()) {  // always true (MyNumber => 1000 vs. undefined)
+            if (changesTracker.ChangesWereMade()) { // always true (MyNumber => 1000 vs. undefined)
                 await Blitz.Catalogs[record.schemaId].save(record); // MyNumber returns to 1000 after saving because no action is taken
-            }
-            else break;
+            } else break;
             timesSaved++;
             // onRecordUpdated ends
         }
 
         expect(timesSaved).toBe(endOfTimes);
         expect(record.MyNumber).toBe(START_RECORD.MyNumber);
-        
+
     });
 
 });
 
-
 describe('Assigning wrong data', () => {
-    
+
     beforeEach(() => {
         record = Object.assign({}, START_RECORD);
         changesTracker = new ChangesTracker(context, record);
     });
-    
+
     test('Numeric - null', () => {
         record.MyNumber = null;
         expect(changesTracker.ChangesWereMade()).toBe(true);
@@ -679,12 +675,12 @@ describe('Assigning wrong data', () => {
         expect(changesTracker.ChangesWereMade()).toBe(false);
         Clean(record);
         expect(record.MyNumber).toBe(undefined);
-    }); 
+    });
 
 });
 
 describe('Links [] / null', () => {
-    
+
     test('[] -> null', () => {
         record = Object.assign({}, START_RECORD);
         record.MyLink = [];
@@ -706,9 +702,9 @@ describe('Links [] / null', () => {
 describe('NaN', () => {
     test('NaN === NaN', () => {
         record = Object.assign({}, START_RECORD);
-        record.MyNumber = 0/0; // NaN
+        record.MyNumber = 0 / 0; // NaN
         changesTracker = new ChangesTracker(context, record);
-        record.MyNumber = 0/0; // NaN
+        record.MyNumber = 0 / 0; // NaN
         expect(changesTracker.ChangesWereMade()).toBe(false);
     });
 
@@ -716,7 +712,7 @@ describe('NaN', () => {
         record = Object.assign({}, START_RECORD);
         record.MyNumber = null;
         changesTracker = new ChangesTracker(context, record);
-        record.MyNumber = 0/0; // NaN
+        record.MyNumber = 0 / 0; // NaN
         expect(changesTracker.ChangesWereMade()).toBe(true);
     });
 
@@ -724,7 +720,7 @@ describe('NaN', () => {
         record = Object.assign({}, START_RECORD);
         record.MyNumber = null;
         changesTracker = new ChangesTracker(context, record);
-        record.MyNumber = 0/0; // NaN
+        record.MyNumber = 0 / 0; // NaN
         expect(changesTracker.ChangesWereMade()).toBe(true);
     });
 
@@ -732,9 +728,26 @@ describe('NaN', () => {
         record = Object.assign({}, START_RECORD);
         record.MyNumber = 0;
         changesTracker = new ChangesTracker(context, record);
-        record.MyNumber = 0/0; // NaN
+        record.MyNumber = 0 / 0; // NaN
         expect(changesTracker.ChangesWereMade()).toBe(true);
     });
 
 });
 
+describe('Lookup array reference', () => {
+    test('push', () => {
+        record = Object.assign({}, START_RECORD);
+        record.MyLink = [];
+        changesTracker = new ChangesTracker(context, record);
+        record.MyLink.push(product2Record);
+        expect(changesTracker.ChangesWereMade()).toBe(true);
+    });
+
+    test('modify reference', () => {
+        record = Object.assign({}, START_RECORD);
+        changesTracker = new ChangesTracker(context, record);
+        const { MyLink: link } = record;
+        link.pop();
+        expect(changesTracker.ChangesWereMade()).toBe(true);
+    });
+});

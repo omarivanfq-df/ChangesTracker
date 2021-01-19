@@ -1,10 +1,15 @@
+/* eslint-disable no-mixed-operators */
+/* eslint-disable no-magic-numbers */
+/* eslint-disable no-bitwise */
+const _ = require('lodash');
+
 const FIELD_TYPES = {
     TEXT: 'Text',
     NUMERIC: 'Numeric',
     TRUE_FALSE: 'True/False',
     DATE: 'Date',
     LINK: 'Link'
-}
+};
 
 const DEFAULT_VALUES = {
     [FIELD_TYPES.TEXT]: '',
@@ -30,7 +35,7 @@ const DEFAULT_CONFIG = {
         (e.g. when record.status goes from 'Rejected' to undefined)
     that property keeps its initial value after saving it
         (e.g. record.status would keep the 'Rejected' value even after saving it)
-    this could trigger an infinite update cycle in Blitz since the OnRecordUpdated 
+    this could trigger an infinite update cycle in Blitz since the OnRecordUpdated
     handler would be executed again and the same change ('Rejected' vs. undefined)
     would be detected each time
     FIX:
@@ -38,13 +43,12 @@ const DEFAULT_CONFIG = {
     default value that can be properly saved
         (e.g. we would change record.status to "")
     IGNORE:
-    when this configuration is set to true the algorithm that compares the 
-    properties simply ignores the change (but the record will still keep the 
+    when this configuration is set to true the algorithm that compares the
+    properties simply ignores the change (but the record will still keep the
     previous value after saving)
         (e.g. record.status would keep its undefined value but would then return
         to 'Rejected' after saving the record)
 */
-
 
 class ChangesTracker {
 
@@ -65,7 +69,7 @@ class ChangesTracker {
     }
 
     GetRecordCopy(record) {
-        const recordCopy = Object.assign({}, record);
+        const recordCopy = _.cloneDeep(record);
         return Object.freeze(recordCopy);
     }
 
@@ -79,7 +83,7 @@ class ChangesTracker {
         }
         let changesWereMade = false;
         this.trackedFields.forEach(fieldId => {
-            changesWereMade = changesWereMade | !this.CompareField(fieldId); 
+            changesWereMade |= !this.CompareField(fieldId);
         });
         return Boolean(changesWereMade);
     }
@@ -91,8 +95,9 @@ class ChangesTracker {
         let currentValue = this.record[fieldId];
         if (currentValue === undefined && previousValue !== undefined) {
             switch (this.config.erasedCompare) {
-                case ERASED_COMPARE.FIX: 
-                    currentValue = this.record[fieldId] = this.defaultValues[type]; //
+                case ERASED_COMPARE.FIX:
+                    this.record[fieldId] = this.defaultValues[type];
+                    currentValue = this.record[fieldId];
                     if (this.isLogActive && previousValue !== this.defaultValues[type]) {
                         this.log('notice', `### Field ${fieldId} was fixed: ${type}(undefined, ${JSON.stringify(currentValue)})`);
                     }
@@ -113,9 +118,7 @@ class ChangesTracker {
     }
 
     AddTrackedFields(fieldsId) {
-        const validFieldIds = fieldsId.filter(id => {
-            return this.fields[id] && !this.trackedFields.includes(id);
-        })
+        const validFieldIds = fieldsId.filter(id => this.fields[id] && !this.trackedFields.includes(id));
         this.trackedFields.push(...validFieldIds);
     }
 
@@ -168,7 +171,7 @@ function CompareNumerics(previous, current) {
     return previous === current;
 }
 
-function CompareDates(date1, date2) { 
+function CompareDates(date1, date2) {
     if (IsValidDate(date1) && !IsValidDate(date2)) {
         return false;
     }
@@ -182,8 +185,8 @@ function CompareDates(date1, date2) {
 }
 
 function CompareLinks(previousValue, currentValue) {
-    previousValue = GetLinkAsArray(previousValue); // []
-    currentValue = GetLinkAsArray(currentValue); // null
+    previousValue = GetLinkAsArray(previousValue);
+    currentValue = GetLinkAsArray(currentValue);
     if (previousValue) {
         if (currentValue) {
             if (previousValue.length === currentValue.length) {
@@ -192,7 +195,7 @@ function CompareLinks(previousValue, currentValue) {
                 return currentValue.every(({ _id }, i) => _id === previousValue[i]._id);
             }
             return false;
-        } 
+        }
         return false; // previous value was defined but current isn't
     }
     return !currentValue;
@@ -201,7 +204,7 @@ function CompareLinks(previousValue, currentValue) {
 function GetLinkAsArray(link) {
     if (Array.isArray(link)) {
         if (link.length) {
-            return link.slice(); // to avoid modifying the original array order later on 
+            return [...link]; // to avoid modifying the original array order later on
         }
         return null;
     } else if (typeof link === 'object' && link !== null) {
