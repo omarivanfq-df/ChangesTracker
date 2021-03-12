@@ -207,6 +207,18 @@ function FixLink(link) {
     return arrayLink;
 }
 
+function GetLinkAsArray(link) {
+    if (Array.isArray(link)) {
+        if (link.length) {
+            return [...link]; // to avoid modifying the original array order later on
+        }
+        return null;
+    } else if (typeof link === 'object' && link !== null) {
+        return [link];
+    }
+    return null;
+}
+
 function RemoveInvalidRecords(link) {
     link.sort(LinkSortCompare);
     const validRecords = [];
@@ -218,18 +230,6 @@ function RemoveInvalidRecords(link) {
         }
     }
     return validRecords;
-}
-
-function GetLinkAsArray(link) {
-    if (Array.isArray(link)) {
-        if (link.length) {
-            return [...link]; // to avoid modifying the original array order later on
-        }
-        return null;
-    } else if (typeof link === 'object' && link !== null) {
-        return [link];
-    }
-    return null;
 }
 
 function LinkSortCompare(link1, link2) {
