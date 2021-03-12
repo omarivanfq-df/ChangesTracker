@@ -751,3 +751,21 @@ describe('Lookup array reference', () => {
         expect(changesTracker.ChangesWereMade()).toBe(true);
     });
 });
+
+describe('Duplicate records in Lookup', () => {
+    beforeEach(() => {
+        record = Object.assign({}, START_RECORD);
+        record.MyLink = [product1Record];
+        changesTracker = new ChangesTracker(context, record);
+    });
+
+    test('duplicate records in lookup', () => {
+        record.MyLink = [product1Record, product1Record];
+        expect(changesTracker.ChangesWereMade()).toBe(false);
+        record.MyLink = [product1Record, product1Record, product1Record];
+        expect(changesTracker.ChangesWereMade()).toBe(false);
+        record.MyLink = [product1Record, product1Record, product1Record, product3Record];
+        expect(changesTracker.ChangesWereMade()).toBe(true);
+    });
+});
+

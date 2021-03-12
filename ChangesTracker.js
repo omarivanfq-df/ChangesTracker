@@ -185,13 +185,11 @@ function CompareDates(date1, date2) {
 }
 
 function CompareLinks(previousValue, currentValue) {
-    previousValue = GetLinkAsArray(previousValue);
-    currentValue = GetLinkAsArray(currentValue);
+    previousValue = FixLink(previousValue);
+    currentValue = FixLink(currentValue);
     if (previousValue) {
         if (currentValue) {
             if (previousValue.length === currentValue.length) {
-                previousValue.sort(LinkSortCompare);
-                currentValue.sort(LinkSortCompare);
                 return currentValue.every(({ _id }, i) => _id === previousValue[i]._id);
             }
             return false;
@@ -199,6 +197,27 @@ function CompareLinks(previousValue, currentValue) {
         return false; // previous value was defined but current isn't
     }
     return !currentValue;
+}
+
+function FixLink(link) {
+    let arrayLink = GetLinkAsArray(link);
+    if (arrayLink) {
+        arrayLink = RemoveInvalidRecords(arrayLink);
+    }
+    return arrayLink;
+}
+
+function RemoveInvalidRecords(link) {
+    link.sort(LinkSortCompare);
+    const validRecords = [];
+    const visited = [];
+    for (const record of link) {
+        if (record._id && !visited.includes(record._id)) {
+            validRecords.push(record);
+            visited.push(record._id);
+        }
+    }
+    return validRecords;
 }
 
 function GetLinkAsArray(link) {
