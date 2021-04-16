@@ -89,28 +89,49 @@ class ChangesTracker {
     }
 
     CompareField(fieldId) {
-        const fieldData = this.fields[fieldId];
-        const { Type: type } = fieldData;
-        const previousValue = this.recordBeforeChanges[fieldId];
-        let currentValue = this.record[fieldId];
-        if (currentValue === undefined && previousValue !== undefined) {
-            switch (this.config.erasedCompare) {
-                case ERASED_COMPARE.FIX:
-                    this.record[fieldId] = this.defaultValues[type];
-                    currentValue = this.record[fieldId];
-                    if (this.isLogActive && previousValue !== this.defaultValues[type]) {
-                        this.log('notice', `### Field ${fieldId} was fixed: ${type}(undefined, ${JSON.stringify(currentValue)})`);
-                    }
-                    break;
-                case ERASED_COMPARE.IGNORE:
-                    return true;
-            }
+        // eslint-disable-next-line prefer-const
+        let { previousValue, currentValue } = this.GetFieldValue(fieldId);
+        if (this.ValueWasErased(previousValue, currentValue)) {
+            const fixedCurrent = this.FixErased(fieldId, previousValue, currentValue);
+            currentValue = fixedCurrent;
         }
+        const type = this.GetFieldType(fieldId);
         const areEqual = CompareFieldsAccordingToType(previousValue, currentValue, type);
         if (this.isLogActive && !areEqual) {
             this.log('notice', `### ${fieldId} field changed: ${type}(${JSON.stringify(previousValue)}, ${JSON.stringify(currentValue)})`);
         }
         return areEqual;
+    }
+
+    GetFieldType(fieldId) {
+        return this.fields[fieldId].Type;
+    }
+
+    GetFieldValue(fieldId) {
+        const currentValue = this.record[fieldId];
+        const previousValue = this.recordBeforeChanges[fieldId];
+        return { currentValue, previousValue };
+    }
+
+    ValueWasErased(previous, current) {
+        return previous !== undefined && current === undefined;
+    }
+
+    FixErased(fieldId, previous, current) {
+        const type = this.GetFieldType(fieldId);
+        let newCurrent = current;
+        switch (this.config.erasedCompare) {
+            case ERASED_COMPARE.FIX:
+                this.record[fieldId] = this.defaultValues[type];
+                newCurrent = this.record[fieldId];
+                if (this.isLogActive && previous !== newCurrent) {
+                    this.log('notice', `### Field ${fieldId} was fixed: ${type}(undefined, ${JSON.stringify(newCurrent)})`);
+                }
+                break;
+            case ERASED_COMPARE.IGNORE:
+                newCurrent = previous;
+        }
+        return newCurrent;
     }
 
     ClearTrackedFields() {
