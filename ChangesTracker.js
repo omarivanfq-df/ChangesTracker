@@ -58,7 +58,7 @@ class ChangesTracker {
         this.trackedFields = this.GetDefaultTrackedFields(this.fields);
         this.recordBeforeChanges = this.GetRecordCopy(record);
         this.config = this.GetConfig(config);
-        this.defaultValues = Object.assign({}, DEFAULT_VALUES);
+        this.defaultValues = { ...DEFAULT_VALUES };
         this.log = context.log || null;
         this.isLogActive = context.log && context.isLogActive || false;
     }
@@ -74,7 +74,7 @@ class ChangesTracker {
     }
 
     GetConfig(customConfig) {
-        return Object.assign({}, DEFAULT_CONFIG, customConfig);
+        return { ...DEFAULT_CONFIG, ...customConfig };
     }
 
     ChangesWereMade() {
