@@ -608,7 +608,6 @@ describe('Complete example', () => {
 });
 
 describe('Assigning wrong data', () => {
-
     beforeEach(() => {
         record = Object.assign({}, START_RECORD);
         changesTracker = new ChangesTracker(context, record);
@@ -629,7 +628,6 @@ describe('Assigning wrong data', () => {
         expect(record.MyNumber).toBe(undefined);
         expect(changesTracker.ChangesWereMade()).toBe(true);
         expect(record.MyNumber).toBe(DEFAULT_VALUES.Numeric); // 0
-
     });
 
     test('Numeric - null (pt.3)', () => {
@@ -766,6 +764,27 @@ describe('Duplicate records in Lookup', () => {
         expect(changesTracker.ChangesWereMade()).toBe(false);
         record.MyLink = [product1Record, product1Record, product1Record, product3Record];
         expect(changesTracker.ChangesWereMade()).toBe(true);
+    });
+});
+
+describe('Array with undefined/null', () => {
+    beforeEach(() => {
+        record = Object.assign({}, START_RECORD);
+        record.MyLink = [];
+        changesTracker = new ChangesTracker(context, record);
+    });
+
+    test('duplicate records in lookup', () => {
+        expect(changesTracker.ChangesWereMade()).toBe(false);
+        record.MyLink = [undefined];
+        expect(changesTracker.ChangesWereMade()).toBe(false);
+        record.MyLink = [product1Record];
+        expect(changesTracker.ChangesWereMade()).toBe(true);
+    });
+
+    test('null vs empty array', () => {
+        record.MyLink = null;
+        expect(changesTracker.ChangesWereMade()).toBe(false);
     });
 });
 
