@@ -78,9 +78,6 @@ class ChangesTracker {
     }
 
     ChangesWereMade() {
-        if (!this.isLogActive) {
-            return this.trackedFields.some(fieldId => !this.CompareField(fieldId));
-        }
         let changesWereMade = false;
         this.trackedFields.forEach(fieldId => {
             changesWereMade |= !this.CompareField(fieldId);
