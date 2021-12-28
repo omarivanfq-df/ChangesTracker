@@ -820,4 +820,14 @@ describe('String Trim Compare', () => {
         expect(changesTracker.ChangesWereMade()).toBe(false);
     });
 
+    test('trimToCompare = true (with null value)', () => {
+        const config = { trimToCompare: true };
+        changesTracker = new ChangesTracker(context, record, config);
+        expect(changesTracker.ChangesWereMade()).toBe(false);
+        record.MyText = null;
+        expect(changesTracker.ChangesWereMade()).toBe(true);
+        record.MyText = undefined;
+        expect(changesTracker.ChangesWereMade()).toBe(true);
+    });
+
 });
