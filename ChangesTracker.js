@@ -26,7 +26,8 @@ const ERASED_COMPARE = {
 };
 
 const DEFAULT_CONFIG = {
-    erasedCompare: ERASED_COMPARE.FIX
+    erasedCompare: ERASED_COMPARE.FIX,
+    trimToCompare: false
 };
 
 /*
@@ -93,7 +94,7 @@ class ChangesTracker {
             currentValue = fixedCurrent;
         }
         const type = this.GetFieldType(fieldId);
-        const areEqual = CompareFieldsAccordingToType(previousValue, currentValue, type);
+        const areEqual = this.CompareFieldsAccordingToType(previousValue, currentValue, type);
         if (this.isLogActive && !areEqual) {
             this.log('notice', `### ${fieldId} field changed: ${type}(${JSON.stringify(previousValue)}, ${JSON.stringify(currentValue)})`);
         }
@@ -102,6 +103,23 @@ class ChangesTracker {
 
     GetFieldType(fieldId) {
         return this.fields[fieldId].Type;
+    }
+
+    CompareFieldsAccordingToType(previousValue, currentValue, type) {
+        switch (type) {
+            case FIELD_TYPES.TRUE_FALSE:
+                return previousValue === currentValue;
+            case FIELD_TYPES.TEXT:
+                return CompareStrings(previousValue, currentValue, this.config);
+            case FIELD_TYPES.NUMERIC:
+                return CompareNumerics(previousValue, currentValue);
+            case FIELD_TYPES.DATE:
+                return CompareDates(previousValue, currentValue);
+            case FIELD_TYPES.LINK:
+                return CompareLinks(previousValue, currentValue);
+            default:
+                return true;
+        }
     }
 
     GetFieldValue(fieldId) {
@@ -166,19 +184,17 @@ function TransformToObject(fieldsArray) {
     return fields;
 }
 
-function CompareFieldsAccordingToType(previousValue, currentValue, type) {
-    switch (type) {
-        case FIELD_TYPES.TEXT:
-        case FIELD_TYPES.TRUE_FALSE:
-            return previousValue === currentValue;
-        case FIELD_TYPES.NUMERIC:
-            return CompareNumerics(previousValue, currentValue);
-        case FIELD_TYPES.DATE:
-            return CompareDates(previousValue, currentValue);
-        case FIELD_TYPES.LINK:
-            return CompareLinks(previousValue, currentValue);
-        default:
-            return true;
+function CompareStrings(previous, current, options) {
+    const { trimToCompare } = options;
+
+    if (trimToCompare) {
+        return TrimIfString(previous) === TrimIfString(current);
+    }
+
+    return previous === current;
+
+    function TrimIfString(value) {
+        return typeof value === 'string' ? value.trim() : value;
     }
 }
 
@@ -205,55 +221,57 @@ function CompareDates(date1, date2) {
 function CompareLinks(previousValue, currentValue) {
     previousValue = FixLink(previousValue);
     currentValue = FixLink(currentValue);
+
     if (previousValue.length === currentValue.length) {
         return currentValue.every(({ _id }, i) => _id === previousValue[i]._id);
     }
+
     return false;
-}
 
-function FixLink(link) {
-    let arrayLink = GetLinkAsArray(link);
-    if (arrayLink) {
-        arrayLink = RemoveInvalidRecords(arrayLink);
-    }
-    return arrayLink;
-}
-
-function GetLinkAsArray(link) {
-    if (Array.isArray(link)) {
-        return link;
-    } else if (typeof link === 'object' && link !== null) {
-        return [link];
-    }
-    return [];
-}
-
-function RemoveInvalidRecords(link) {
-    link = OnlyObjects(link);
-    link.sort(LinkSortCompare);
-    const validRecords = [];
-    const visited = [];
-    for (const record of link) {
-        if (record._id && !visited.includes(record._id)) {
-            validRecords.push(record);
-            visited.push(record._id);
+    function FixLink(link) {
+        let arrayLink = GetLinkAsArray(link);
+        if (arrayLink) {
+            arrayLink = RemoveInvalidRecords(arrayLink);
         }
+        return arrayLink;
     }
-    return validRecords;
-}
 
-function OnlyObjects(array) {
-    return array.filter(item => item && !Array.isArray(item) && typeof item === 'object');
-}
+    function GetLinkAsArray(link) {
+        if (Array.isArray(link)) {
+            return link;
+        } else if (typeof link === 'object' && link !== null) {
+            return [link];
+        }
+        return [];
+    }
 
-function LinkSortCompare(link1, link2) {
-    if (link1._id < link2._id) {
-        return -1;
+    function RemoveInvalidRecords(link) {
+        link = OnlyObjects(link);
+        link.sort(LinkSortCompare);
+        const validRecords = [];
+        const visited = [];
+        for (const record of link) {
+            if (record._id && !visited.includes(record._id)) {
+                validRecords.push(record);
+                visited.push(record._id);
+            }
+        }
+        return validRecords;
     }
-    if (link1._id > link2._id) {
-        return 1;
+
+    function OnlyObjects(array) {
+        return array.filter(item => item && !Array.isArray(item) && typeof item === 'object');
     }
-    return 0;
+
+    function LinkSortCompare(link1, link2) {
+        if (link1._id < link2._id) {
+            return -1;
+        }
+        if (link1._id > link2._id) {
+            return 1;
+        }
+        return 0;
+    }
 }
 
 function IsValidDate(date) {

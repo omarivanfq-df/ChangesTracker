@@ -1,6 +1,7 @@
 /* eslint-disable init-declarations */
 /* eslint-disable no-magic-numbers */
 const ChangesTracker = require('./ChangesTracker');
+const _ = require('lodash');
 
 const {
     FIELD_TYPES,
@@ -92,7 +93,7 @@ const context = {
 describe('Basic field types', () => {
 
     beforeEach(() => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         changesTracker = new ChangesTracker(context, record);
     });
 
@@ -162,7 +163,7 @@ describe('Basic field types', () => {
 
 describe('Basic field types (specifying tracked fields)', () => {
     beforeEach(() => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         changesTracker = new ChangesTracker(context, record);
         changesTracker.ClearTrackedFields();
         changesTracker.AddTrackedFields(['MyText', 'MyTrueFalse']);
@@ -224,7 +225,7 @@ describe('Basic field types (specifying tracked fields)', () => {
 
 describe('Complex examples with specified tracked fields', () => {
     beforeEach(() => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         changesTracker = new ChangesTracker(context, record);
         changesTracker.ClearTrackedFields();
     });
@@ -275,7 +276,7 @@ describe('Complex examples with specified tracked fields', () => {
 
 describe('Erasing properties', () => {
     beforeEach(() => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         changesTracker = new ChangesTracker(context, record);
     });
 
@@ -323,7 +324,7 @@ describe('Erasing properties', () => {
 
 describe('Links (Lookups)', () => {
     beforeEach(() => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         changesTracker = new ChangesTracker(context, record);
     });
 
@@ -434,7 +435,7 @@ describe('Links (Lookups)', () => {
 
 describe('Configuration', () => {
     beforeEach(() => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
     });
 
     test('erasedCompare: FIX (default)', () => {
@@ -508,7 +509,7 @@ describe('Complete example', () => {
     });
 
     beforeEach(() => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
     });
 
     test('Saving-cycle when record defined property is erased (erasedCompare: FIX)', async() => {
@@ -609,7 +610,7 @@ describe('Complete example', () => {
 
 describe('Assigning wrong data', () => {
     beforeEach(() => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         changesTracker = new ChangesTracker(context, record);
     });
 
@@ -620,7 +621,7 @@ describe('Assigning wrong data', () => {
     });
 
     test('Numeric - null (pt.2)', () => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         record.MyNumber = null;
         changesTracker = new ChangesTracker(context, record);
         expect(changesTracker.ChangesWereMade()).toBe(false);
@@ -631,7 +632,7 @@ describe('Assigning wrong data', () => {
     });
 
     test('Numeric - null (pt.3)', () => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         delete record.MyNumber;
         changesTracker = new ChangesTracker(context, record);
         expect(changesTracker.ChangesWereMade()).toBe(false);
@@ -641,7 +642,7 @@ describe('Assigning wrong data', () => {
     });
 
     test('Numeric - text', () => {
-        record = Object.assign({}, START_RECORD, { MyNumber: 'bad data' });
+        record = _.cloneDeep(Object.assign({}, START_RECORD, { MyNumber: 'bad data' }));
         changesTracker = new ChangesTracker(context, record);
         expect(changesTracker.ChangesWereMade()).toBe(false);
         Clean(record);
@@ -668,7 +669,7 @@ describe('Assigning wrong data', () => {
     });
 
     test('undefined - null', () => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         delete record.MyNumber;
         expect(changesTracker.ChangesWereMade()).toBe(false);
         Clean(record);
@@ -680,7 +681,7 @@ describe('Assigning wrong data', () => {
 describe('Links [] / null', () => {
 
     test('[] -> null', () => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         record.MyLink = [];
         changesTracker = new ChangesTracker(context, record);
         record.MyLink = null;
@@ -688,7 +689,7 @@ describe('Links [] / null', () => {
     });
 
     test('null -> []', () => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         record.MyLink = null;
         changesTracker = new ChangesTracker(context, record);
         record.MyLink = [];
@@ -699,7 +700,7 @@ describe('Links [] / null', () => {
 
 describe('NaN', () => {
     test('NaN === NaN', () => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         record.MyNumber = 0 / 0; // NaN
         changesTracker = new ChangesTracker(context, record);
         record.MyNumber = 0 / 0; // NaN
@@ -707,7 +708,7 @@ describe('NaN', () => {
     });
 
     test('null === NaN', () => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         record.MyNumber = null;
         changesTracker = new ChangesTracker(context, record);
         record.MyNumber = 0 / 0; // NaN
@@ -715,7 +716,7 @@ describe('NaN', () => {
     });
 
     test('NaN === null', () => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         record.MyNumber = null;
         changesTracker = new ChangesTracker(context, record);
         record.MyNumber = 0 / 0; // NaN
@@ -723,7 +724,7 @@ describe('NaN', () => {
     });
 
     test('0 === null', () => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         record.MyNumber = 0;
         changesTracker = new ChangesTracker(context, record);
         record.MyNumber = 0 / 0; // NaN
@@ -734,7 +735,7 @@ describe('NaN', () => {
 
 describe('Lookup array reference', () => {
     test('push', () => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         record.MyLink = [];
         changesTracker = new ChangesTracker(context, record);
         record.MyLink.push(product2Record);
@@ -742,7 +743,7 @@ describe('Lookup array reference', () => {
     });
 
     test('modify reference', () => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         changesTracker = new ChangesTracker(context, record);
         const { MyLink: link } = record;
         link.pop();
@@ -752,7 +753,7 @@ describe('Lookup array reference', () => {
 
 describe('Duplicate records in Lookup', () => {
     beforeEach(() => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         record.MyLink = [product1Record];
         changesTracker = new ChangesTracker(context, record);
     });
@@ -769,7 +770,7 @@ describe('Duplicate records in Lookup', () => {
 
 describe('Array with undefined/null', () => {
     beforeEach(() => {
-        record = Object.assign({}, START_RECORD);
+        record = _.cloneDeep(START_RECORD);
         record.MyLink = [];
         changesTracker = new ChangesTracker(context, record);
     });
@@ -788,3 +789,35 @@ describe('Array with undefined/null', () => {
     });
 });
 
+describe('String Trim Compare', () => {
+    const TEST_TEXT = 'blitz rocks!';
+
+    beforeEach(() => {
+        record = _.cloneDeep(START_RECORD);
+        record.MyText = TEST_TEXT;
+    });
+
+    test('trimToCompare default', () => {
+        changesTracker = new ChangesTracker(context, record);
+        expect(changesTracker.ChangesWereMade()).toBe(false);
+        record.MyText = `  ${TEST_TEXT}  `;
+        expect(changesTracker.ChangesWereMade()).toBe(true);
+    });
+
+    test('trimToCompare = false', () => {
+        const config = { trimToCompare: false };
+        changesTracker = new ChangesTracker(context, record, config);
+        expect(changesTracker.ChangesWereMade()).toBe(false);
+        record.MyText = `  ${TEST_TEXT}  `;
+        expect(changesTracker.ChangesWereMade()).toBe(true);
+    });
+
+    test('trimToCompare = true', () => {
+        const config = { trimToCompare: true };
+        changesTracker = new ChangesTracker(context, record, config);
+        expect(changesTracker.ChangesWereMade()).toBe(false);
+        record.MyText = `  ${TEST_TEXT}  `;
+        expect(changesTracker.ChangesWereMade()).toBe(false);
+    });
+
+});
