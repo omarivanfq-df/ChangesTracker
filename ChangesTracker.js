@@ -229,11 +229,7 @@ function CompareLinks(previousValue, currentValue) {
     return false;
 
     function FixLink(link) {
-        let arrayLink = GetLinkAsArray(link);
-        if (arrayLink) {
-            arrayLink = RemoveInvalidRecords(arrayLink);
-        }
-        return arrayLink;
+        return RemoveInvalidRecords(GetLinkAsArray(link));
     }
 
     function GetLinkAsArray(link) {
